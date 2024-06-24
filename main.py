@@ -9,7 +9,6 @@ from langchain.memory import ConversationBufferMemory
 from langchain.memory import StreamlitChatMessageHistory
 from langchain.chains import ConversationalRetrievalChain
 from langchain.chat_models import ChatOpenAI
-from langchain.schema import Document
 from langchain.schema.messages import HumanMessage, AIMessage
 import tiktoken
 import json
@@ -48,7 +47,7 @@ def main():
         if st.session_state.conversation and st.session_state.chat_history:
             save_button = st.button("대화 저장")
             if save_button:
-                save_conversation(st.session_state.chat_history)
+                save_conversation_as_txt(st.session_state.chat_history)
     
     if 'messages' not in st.session_state:
         st.session_state['messages'] = [{"role": "assistant", 
@@ -82,22 +81,6 @@ def main():
                         st.markdown(doc.metadata['source'], help=doc.page_content)
 
         st.session_state.messages.append({"role": "assistant", "content": response})
-
-    if st.session_state.get('chat_history'):
-        st.write("## 채팅 내용")
-        for idx, message in enumerate(st.session_state.chat_history):
-            role = "user" if isinstance(message, HumanMessage) else "assistant"
-            content = message.content
-            st.write(f"### 메시지 {idx + 1}")
-            st.write(f"**역할:** {role}")
-            st.write(f"**내용:** {content}")
-            st.write("---")
-            
-            # 메시지 다운로드 링크 생성
-            msg = f"역할: {role}\n내용: {content}\n"
-            b64 = base64.b64encode(msg.encode()).decode()
-            href = f'<a href="data:file/txt;base64,{b64}" download="채팅_메시지_{idx + 1}.txt">메시지 다운로드</a>'
-            st.markdown(href, unsafe_allow_html=True)
 
 def tiktoken_len(text):
     tokenizer = tiktoken.get_encoding("cl100k_base")
@@ -155,20 +138,16 @@ def get_conversation_chain(vectorstore, openai_api_key, model_name):
     )
     return conversation_chain
 
-def save_conversation(chat_history):
-    conversation = []
+def save_conversation_as_txt(chat_history):
+    conversation = ""
     for message in chat_history:
         role = "user" if isinstance(message, HumanMessage) else "assistant"
         content = message.content
-        conversation.append({"role": role, "content": content})
+        conversation += f"역할: {role}\n내용: {content}\n\n"
     
-    conversation_json = json.dumps(conversation, ensure_ascii=False, indent=4)
-    st.download_button(
-        label="대화 다운로드",
-        data=conversation_json,
-        file_name="conversation.json",
-        mime="application/json"
-    )
+    b64 = base64.b64encode(conversation.encode()).decode()
+    href = f'<a href="data:file/txt;base64,{b64}" download="대화.txt">대화 다운로드</a>'
+    st.markdown(href, unsafe_allow_html=True)
 
 if __name__ == '__main__':
     main()
