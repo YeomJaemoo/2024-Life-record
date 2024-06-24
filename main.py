@@ -17,7 +17,7 @@ import base64
 def main():
     st.set_page_config(page_title="kangsinchat", page_icon="🏫")
     st.image('knowhow.png')
-    st.title("_강신중학교 :red[생활기록부기재요령 도우미]_ 🏫")
+    st.title("_강신중학교\n:red[생활기록부기재요령] 도우미_ 🏫")
     st.header("😶주의!이 챗봇은 참고용으로 사용하세요!", divider='rainbow')
 
     if "conversation" not in st.session_state:
