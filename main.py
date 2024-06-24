@@ -44,12 +44,13 @@ def main():
             st.session_state.conversation = get_conversation_chain(vectorstore, openai_api_key, model_name)
             st.session_state.processComplete = True
 
-        if st.session_state.conversation and st.session_state.chat_history:
+        save_button = st.button("대화 저장", key="save_button")
+        if save_button:
             if st.session_state.chat_history:
-                save_button = st.button("대화 저장", key="save_button")
-                if save_button:
-                    save_conversation_as_txt(st.session_state.chat_history)
-    
+                save_conversation_as_txt(st.session_state.chat_history)
+            else:
+                st.warning("질문을 입력받고 응답을 확인하세요!")
+
     if 'messages' not in st.session_state:
         st.session_state['messages'] = [{"role": "assistant", 
                                          "content": "생활기록부기재요령에 대해 물어보세요!😊"}]
