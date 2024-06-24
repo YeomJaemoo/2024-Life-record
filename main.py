@@ -17,14 +17,14 @@ import base64
 def main():
     st.set_page_config(page_title="kangsinchat", page_icon="🏫")
     st.image('knowhow.png')
-    st.title("_강신중학교\n:red[생활기록부기재요령] 도우미_ 🏫")
+    st.title("_강신중학교 :red[생활기록부기재요령 도우미]_ 🏫")
     st.header("😶주의!이 챗봇은 참고용으로 사용하세요!", divider='rainbow')
 
     if "conversation" not in st.session_state:
         st.session_state.conversation = None
 
     if "chat_history" not in st.session_state:
-        st.session_state.chat_history = None
+        st.session_state.chat_history = []
 
     if "processComplete" not in st.session_state:
         st.session_state.processComplete = None
@@ -35,8 +35,8 @@ def main():
         model_name = 'gpt-3.5-turbo'
         
         st.text("아래의 'Process'를 누르고\n아래 채팅창이 활성화 될 때까지\n잠시 기다려주세요!🙂🙂🙂")
-        process = st.button("Process")
-        save_button = st.button("대화 저장")
+        process = st.button("Process", key="process_button")
+        
         if process:
             files_text = get_text_from_folder(folder_path)
             text_chunks = get_text_chunks(files_text)
@@ -45,9 +45,10 @@ def main():
             st.session_state.processComplete = True
 
         if st.session_state.conversation and st.session_state.chat_history:
-            save_button = st.button("대화 저장")
-            if save_button:
-                save_conversation_as_txt(st.session_state.chat_history)
+            if st.session_state.chat_history:
+                save_button = st.button("대화 저장", key="save_button")
+                if save_button:
+                    save_conversation_as_txt(st.session_state.chat_history)
     
     if 'messages' not in st.session_state:
         st.session_state['messages'] = [{"role": "assistant", 
