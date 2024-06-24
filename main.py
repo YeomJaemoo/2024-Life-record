@@ -11,6 +11,7 @@ from langchain.chains import ConversationalRetrievalChain
 from langchain.chat_models import ChatOpenAI
 from langchain.schema import Document
 import tiktoken
+import json
 
 def main():
     st.set_page_config(page_title="kangsinchat", page_icon="🏫")
@@ -31,17 +32,22 @@ def main():
         folder_path = Path()
         openai_api_key = st.secrets["OPENAI_API_KEY"]
         model_name = 'gpt-3.5-turbo'
+        
+        st.text("아래의 'Process'를 누르고 아래 채팅창이 활성화 될 때까지 잠시 기다려주세요!🙂🙂🙂")
+        process = st.button("Process")
+        
+        if process:
+            files_text = get_text_from_folder(folder_path)
+            text_chunks = get_text_chunks(files_text)
+            vectorstore = get_vectorstore(text_chunks)
+            st.session_state.conversation = get_conversation_chain(vectorstore, openai_api_key, model_name)
+            st.session_state.processComplete = True
+
+        if st.session_state.conversation and st.session_state.chat_history:
+            save_button = st.button("Save Conversation")
+            if save_button:
+                save_conversation(st.session_state.chat_history)
     
-    st.text("아래의 'Process'를 누르고 아래 채팅창이 활성화 될 때까지 잠시 기다려주세요!🙂🙂🙂")
-    process = st.button("Process")
-
-    if process:
-        files_text = get_text_from_folder(folder_path)
-        text_chunks = get_text_chunks(files_text)
-        vectorstore = get_vectorstore(text_chunks)
-        st.session_state.conversation = get_conversation_chain(vectorstore, openai_api_key, model_name)
-        st.session_state.processComplete = True
-
     if 'messages' not in st.session_state:
         st.session_state['messages'] = [{"role": "assistant", 
                                          "content": "생활기록부기재요령에 대해 물어보세요!😊"}]
@@ -130,6 +136,21 @@ def get_conversation_chain(vectorstore, openai_api_key, model_name):
         verbose=True
     )
     return conversation_chain
+
+def save_conversation(chat_history):
+    conversation = []
+    for message in chat_history:
+        role = message["role"]
+        content = message["content"]
+        conversation.append({"role": role, "content": content})
+    
+    conversation_json = json.dumps(conversation, ensure_ascii=False, indent=4)
+    st.download_button(
+        label="Download Conversation",
+        data=conversation_json,
+        file_name="conversation.json",
+        mime="application/json"
+    )
 
 if __name__ == '__main__':
     main()
