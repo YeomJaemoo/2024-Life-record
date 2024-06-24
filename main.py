@@ -10,6 +10,7 @@ from langchain.memory import StreamlitChatMessageHistory
 from langchain.chains import ConversationalRetrievalChain
 from langchain.chat_models import ChatOpenAI
 from langchain.schema import Document
+from langchain.schema.messages import HumanMessage, AIMessage
 import tiktoken
 import json
 import base64
@@ -34,9 +35,8 @@ def main():
         openai_api_key = st.secrets["OPENAI_API_KEY"]
         model_name = 'gpt-3.5-turbo'
         
-        st.text("아래의 'Process'를 누르고\n아래 채팅창이 활성화 될 때까지\n잠시 기다려 주세요!🙂")
+        st.text("아래의 'Process'를 누르고\n아래 채팅창이 활성화 될 때까지\n잠시 기다려주세요!🙂🙂🙂")
         process = st.button("Process")
-        
         
         if process:
             files_text = get_text_from_folder(folder_path)
@@ -44,9 +44,9 @@ def main():
             vectorstore = get_vectorstore(text_chunks)
             st.session_state.conversation = get_conversation_chain(vectorstore, openai_api_key, model_name)
             st.session_state.processComplete = True
-            st.text("대화를 저장하고 싶으면\n'save conversation'을\n눌러 주세요!🙂")
+
         if st.session_state.conversation and st.session_state.chat_history:
-            save_button = st.button("Save Conversation")
+            save_button = st.button("대화 저장")
             if save_button:
                 save_conversation(st.session_state.chat_history)
     
@@ -69,7 +69,7 @@ def main():
         with st.chat_message("assistant"):
             chain = st.session_state.conversation
 
-            with st.spinner("Thinking..."):
+            with st.spinner("생각 중..."):
                 result = chain({"question": query})
                 with get_openai_callback() as cb:
                     st.session_state.chat_history = result['chat_history']
@@ -86,13 +86,15 @@ def main():
     if st.session_state.get('chat_history'):
         st.write("## 채팅 내용")
         for idx, message in enumerate(st.session_state.chat_history):
+            role = "user" if isinstance(message, HumanMessage) else "assistant"
+            content = message.content
             st.write(f"### 메시지 {idx + 1}")
-            st.write(f"**역할:** {message['role']}")
-            st.write(f"**내용:** {message['content']}")
+            st.write(f"**역할:** {role}")
+            st.write(f"**내용:** {content}")
             st.write("---")
             
             # 메시지 다운로드 링크 생성
-            msg = f"역할: {message['role']}\n내용: {message['content']}\n"
+            msg = f"역할: {role}\n내용: {content}\n"
             b64 = base64.b64encode(msg.encode()).decode()
             href = f'<a href="data:file/txt;base64,{b64}" download="채팅_메시지_{idx + 1}.txt">메시지 다운로드</a>'
             st.markdown(href, unsafe_allow_html=True)
@@ -156,13 +158,13 @@ def get_conversation_chain(vectorstore, openai_api_key, model_name):
 def save_conversation(chat_history):
     conversation = []
     for message in chat_history:
-        role = message["role"]
-        content = message["content"]
+        role = "user" if isinstance(message, HumanMessage) else "assistant"
+        content = message.content
         conversation.append({"role": role, "content": content})
     
     conversation_json = json.dumps(conversation, ensure_ascii=False, indent=4)
     st.download_button(
-        label="Download Conversation",
+        label="대화 다운로드",
         data=conversation_json,
         file_name="conversation.json",
         mime="application/json"
