@@ -34,8 +34,9 @@ def main():
         openai_api_key = st.secrets["OPENAI_API_KEY"]
         model_name = 'gpt-3.5-turbo'
         
-        st.text("아래의 'Process'를 누르고\n아래 채팅창이 활성화 될 때까지\n잠시 기다려주세요!🙂🙂🙂")
+        st.text("아래의 'Process'를 누르고\n아래 채팅창이 활성화 될 때까지\n잠시 기다려 주세요!🙂")
         process = st.button("Process")
+        st.text("대화를 저장하고 싶으면\n'save conversation'을\n눌러 주세요!🙂")
         
         if process:
             files_text = get_text_from_folder(folder_path)
