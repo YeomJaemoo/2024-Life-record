@@ -12,6 +12,7 @@ from langchain.chat_models import ChatOpenAI
 from langchain.schema import Document
 import tiktoken
 import json
+import base64
 
 def main():
     st.set_page_config(page_title="kangsinchat", page_icon="🏫")
@@ -33,9 +34,8 @@ def main():
         openai_api_key = st.secrets["OPENAI_API_KEY"]
         model_name = 'gpt-3.5-turbo'
         
-        st.text("아래의 'Process'를 누르고\n아래 채팅창이 활성화 될 때까지\n잠시 기다려주세요!🙂")
+        st.text("아래의 'Process'를 누르고\n아래 채팅창이 활성화 될 때까지\n잠시 기다려주세요!🙂🙂🙂")
         process = st.button("Process")
-        st.text("채팅 내용을 저장하고 싶다면\n'채팅 저장'을 클릭!😉")
         
         if process:
             files_text = get_text_from_folder(folder_path)
@@ -45,7 +45,7 @@ def main():
             st.session_state.processComplete = True
 
         if st.session_state.conversation and st.session_state.chat_history:
-            save_button = st.button("채팅 저장")
+            save_button = st.button("Save Conversation")
             if save_button:
                 save_conversation(st.session_state.chat_history)
     
@@ -81,6 +81,20 @@ def main():
                         st.markdown(doc.metadata['source'], help=doc.page_content)
 
         st.session_state.messages.append({"role": "assistant", "content": response})
+
+    if st.session_state.get('chat_history'):
+        st.write("## 채팅 내용")
+        for idx, message in enumerate(st.session_state.chat_history):
+            st.write(f"### 메시지 {idx + 1}")
+            st.write(f"**역할:** {message['role']}")
+            st.write(f"**내용:** {message['content']}")
+            st.write("---")
+            
+            # 메시지 다운로드 링크 생성
+            msg = f"역할: {message['role']}\n내용: {message['content']}\n"
+            b64 = base64.b64encode(msg.encode()).decode()
+            href = f'<a href="data:file/txt;base64,{b64}" download="채팅_메시지_{idx + 1}.txt">메시지 다운로드</a>'
+            st.markdown(href, unsafe_allow_html=True)
 
 def tiktoken_len(text):
     tokenizer = tiktoken.get_encoding("cl100k_base")
