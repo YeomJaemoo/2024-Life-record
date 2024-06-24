@@ -36,7 +36,7 @@ def main():
         
         st.text("아래의 'Process'를 누르고\n아래 채팅창이 활성화 될 때까지\n잠시 기다려주세요!🙂🙂🙂")
         process = st.button("Process")
-        
+        save_button = st.button("대화 저장")
         if process:
             files_text = get_text_from_folder(folder_path)
             text_chunks = get_text_chunks(files_text)
