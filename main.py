@@ -36,7 +36,7 @@ def main():
         
         st.text("아래의 'Process'를 누르고\n아래 채팅창이 활성화 될 때까지\n잠시 기다려 주세요!🙂")
         process = st.button("Process")
-        st.text("대화를 저장하고 싶으면\n'save conversation'을\n눌러 주세요!🙂")
+        
         
         if process:
             files_text = get_text_from_folder(folder_path)
@@ -44,7 +44,7 @@ def main():
             vectorstore = get_vectorstore(text_chunks)
             st.session_state.conversation = get_conversation_chain(vectorstore, openai_api_key, model_name)
             st.session_state.processComplete = True
-
+            st.text("대화를 저장하고 싶으면\n'save conversation'을\n눌러 주세요!🙂")
         if st.session_state.conversation and st.session_state.chat_history:
             save_button = st.button("Save Conversation")
             if save_button:
