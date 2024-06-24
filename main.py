@@ -14,8 +14,8 @@ import tiktoken
 
 def main():
     st.set_page_config(page_title="kangsinchat", page_icon="🏫")
-    st.image('kangsin_middle_school.png')
-    st.title("_강신중학교 :red[Q&A]_ 🏫")
+    st.image('knowhow.png')
+    st.title("_강신중학교 :red[생활기록부기재요령 도우미]_ 🏫")
     st.header("😶주의!이 챗봇은 참고용으로 사용하세요!", divider='rainbow')
 
     if "conversation" not in st.session_state:
@@ -44,7 +44,7 @@ def main():
 
     if 'messages' not in st.session_state:
         st.session_state['messages'] = [{"role": "assistant", 
-                                         "content": "강신중학교 생활&성적 규정에 대해 물어보세요!😊"}]
+                                         "content": "생활기록부기재요령에 대해 물어보세요!😊"}]
 
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
